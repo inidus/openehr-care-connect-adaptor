@@ -1,38 +1,31 @@
-# See http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
+#
+# As docker is used the standard port of 8080 is sufficient.
+# The docker call must include it via 'docker run -p 1234:8080' (external port:internal port)
+#
 spring:
   thymeleaf.cache: false
 logging:
   level:
+    ROOT: INFO
     org.springframework.web: INFO
     guru.springframework.controllers: INFO
     org.hibernate: INFO
     com.inidus.platform: INFO
+#
+# THESE PROPERTIES MUST BE SET!
+# As docker is used this can be done via passing environment variables into docker when starting the image.
+# Ideally a .env file is being used, eg:
+#
+# # CDR
+# cdr-connector.url=http://178.62.71.220:8080
+# cdr-connector.isTokenAuth=TRUE
+# cdr-connector.username=guest
+# cdr-connector.password=guest
+#
+# The docker call then includes it via 'docker run --env-file "fhir-adaptor.env"'
+#
 cdr-connector:
-  url: 'http://178.62.71.220:8080'
-  username: guest
-  password: guest
-  is-token-auth: true
-server:
-  port: 8081
-
----
-spring:
-  profiles: marand
-cdr-connector:
-  url: 'https://test.operon.systems'
-  username: oprn_hcbox
-  password: XioTAJoO479
-  is-token-auth: false
-server:
-  port: 8082
-
----
-spring:
-  profiles: ethercis
-cdr-connector:
-  url: 'http://178.62.71.220:8080'
-  username: guest
-  password: guest
-  is-token-auth: true
-server:
-  port: 8083
+  url:
+  username:
+  password:
+  is-token-auth:

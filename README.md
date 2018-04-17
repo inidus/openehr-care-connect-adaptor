@@ -1,4 +1,5 @@
 
+
 ![Logos](docs/images/combined.png)
 
 # openEHR-FHIR INTEROpen Care Connect STU3 Adaptor
@@ -6,25 +7,24 @@
 This is a proof-of-concept Web service commissioned by NHS Digital Code4Health that exposes [HL7 FHIR](https://www.hl7.org/fhir) operations (`read`, `search`, `conformance`) from a choice of [openEHR CDRs](https://docs.code4health.org/ES0-overview-openehr-ehrscape.html) (Ehrscape compliant e.g. Marand Think!Ehr or Ripple EtherCis) for a small range of [INTEROpen Care-Connect](https://nhsconnect.github.io/CareConnectAPI/) profiles, using the [HAPI FHIR](http://hapifhir.io) stack.
 
 ## Build the project
-`./mvnw clean package` (inside the project folder)
+`./mvnw clean package -DskipTests` (inside the project folder)
+## Build the project and create a docker image
+`./mvnw clean install -DskipTests dockerfile:build`
 
-## Deploy
-Copy `fhir-adaptor.jar` from `target` folder to your server
+Uploading the docker image to docker cloud will make it easily accessible on your server
 
-### Run with Marand backend
-`java -jar fhir-adaptor.jar --spring.profiles.active=marand` (will run on port 8082)
+The default name of the image will be `[username]/fhir-adaptor` (`docker ps` can be used to find out what the image is called)
 
-### Run with Ethercis backend
-`java -jar fhir-adaptor.jar --spring.profiles.active=ethercis` (will run on port 8083)
+### Deploy (Docker)
+`docker run -td --name care-connect-adaptor --env-file "../fhir-adaptor.env" -p 8083:8080 fhir-adaptor`
 
-### Docker
-TBD
+This will expose the FHIR API at `yourServerUrl:8083/fhir/`
 
+This form of deployment is a very simple one without any other components required.
+The future setup will include an nginx reverse proxy to allow for multiple different adaptor instances using different EHRs.
 
-### Code4Health Demo endpoints
-
-
-#### Using Marand ThinkEHR openEHR CDR
+## Code4Health Demo endpoints
+### Using Marand ThinkEHR openEHR CDR
 
 `read` (all)
 
@@ -44,7 +44,7 @@ TBD
 - [Conformance](https://platform.code4health.org/marand/fhir/Conformance)
 
 
-#### Using Ripple EtherCis openEHR CDR
+### Using Ripple EtherCis openEHR CDR
 
 `read` (all)
 
@@ -66,7 +66,7 @@ TBD
 
 ## Background
 
-The intent was to create an extensible framework  to support the creation of a FHIR API for any openEHR CDR that supports the EHRscape API - This includes the Marand and etherCIS CDRs used by Code4Health, with other CDR providers likely to follow suit.
+The intent was to create an extensible framework to support the creation of a FHIR API for any openEHR CDR that supports the EHRscape API - This includes the Marand and etherCIS CDRs used by Code4Health, with other CDR providers likely to follow suit.
 
 The API was built using HAPI-FHIR, an open-source implementation of the FHIR specification in Java. HAPI-FHIR simplifies the building of a FHIR API on any data source and its use simplifies conformance with the FHIR standard as it has already be tested in a number of implementations. It was originally intended to base the project on FHIR DSTU2, but during development it became clear that STU3 was becoming preferred for current INTEROpen Care-connect and GP-Connect profile curation. This curation work is well advanced but not yet stable, so it is ecpected that further revisions ot the mappings will be required as stable, published versions emerge.
 
@@ -158,7 +158,7 @@ where a/name/value='Adverse reaction list'
 -- Optional parameters, depending on FHIR search criteria
 and e/ehr_id/value = '{{fhir.patient.id_param}}'
 and e/ehr_status/subject/external_ref/id/value = '{{fhir.patient.identifier.value.param}}'
-and e/ehr_status/subject/external_ref/namespace =  '{{fhir.patient.identifier.system.param}}'
+and e/ehr_status/subject/external_ref/namespace = '{{fhir.patient.identifier.system.param}}'
 and b_a/data[at0001]/items[at0120]/value/defining_code_string = '{{fhir_category_params}}'
 and b_a/protocol[at0042]/items[at0062]/value/value >= '{{fhir_date_param_min}}'
 and b_a/protocol[at0042]/items[at0062]/value/value <= '{{fhir_date_param_max}}'
